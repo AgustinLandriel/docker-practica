@@ -1,0 +1,75 @@
+services:
+  vote:
+    image: app-vote:1.0
+    ports:
+      - "8080:80"
+    networks:
+      - network-app
+    environment:
+      - REDIS_HOST=redis  
+      - DATABASE_HOST=database
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_DB=votes
+    depends_on:
+      - redis
+      - database
+
+  result:
+    build: ./result
+    ports:
+      - "3000:3000"
+    networks:
+      - network-app
+    environment:
+      - APP_PORT=3000
+      - DATABASE_HOST=database
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_DB=votes
+    depends_on:
+      - redis
+      - database  
+
+  worker:
+    build: ./worker
+    ports:
+      - "3001:3000"
+    networks:
+      - network-app
+    environment:
+      - REDIS=redis
+      - DATABASE_HOST=database
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_DB=votes
+    depends_on:
+      - redis
+      - database
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - network-app
+
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: votes
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - network-app    
+    ports:
+      - "5432:5432"
+
+
+networks:
+  network-app:
+    driver: bridge
+
+volumes:
+  pg-data:
