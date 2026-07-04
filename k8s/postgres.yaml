@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: database
+          image: postgres:15
+          envFrom:
+            - configMapRef:
+                name: host-config
+            - secretRef:
+                name: postgres-secret
+
+          # env:
+          #   - name: POSTGRES_USER
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: postgres-secret
+          #         key: POSTGRES_USER
+
+          #   - name: POSTGRES_PASSWORD
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: postgres-secret
+          #         key: POSTGRES_PASSWORD
+
+          #   - name: POSTGRES_DB
+          #     valueFrom:
+          #       configMapKeyRef:
+          #         name: postgres-config
+          #         key: POSTGRES_DB
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 5432
+          volumeMounts: #Dentro del contenedor
+            - name: postgres-storage #Nombre del volumen que cree en la sección de volúmenes
+              mountPath: /var/lib/postgresql/data # donde postgres guarda los datos
+
+      volumes: ## Creo el volumen a nivel POD
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc #PVC que creamos en k8s/pvc.yaml
+
+
+# volumes → declara "hay un volumen llamado postgres-storage que usa el PVC"
+# volumeMounts → dice "montá ese postgres-storage en /var/lib/postgresql/data"

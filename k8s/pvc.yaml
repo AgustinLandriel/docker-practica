@@ -1,0 +1,20 @@
+# Tu Deployment dice: "necesito 1GB de disco" → hace un PVC (un pedido)
+#       ↓
+# Kubernetes busca un PV que satisfaga ese pedido (o lo crea)
+#       ↓
+# El PVC se "conecta" al PV
+#       ↓
+# Tu pod monta el PVC como un volumen
+#       ↓
+# Los datos viven en el PV (afuera del pod) → sobreviven aunque el pod muera
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce # un solo nodo puede escribir
+  resources:
+    requests:
+      storage: 1Gi # pide 1GB de disco

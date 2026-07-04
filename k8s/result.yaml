@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: result
+  template:
+    metadata:
+      labels:
+        app: result
+    spec:
+      containers:
+        - name: result
+          image: agustindev/result:1.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_PORT
+              value: "3000"
+            - name: DATABASE_HOST
+              value: "database"
+            - name: DATABASE_USER
+              value: "postgres"
+            - name: DATABASE_PASSWORD
+              value: "postgres"
+            - name: DATABASE_NAME
+              value: "votes"

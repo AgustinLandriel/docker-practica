@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels: # "yo gestiono los Pods con esta etiqueta"
+      app: flask-app
+  template:
+    metadata:
+      labels:
+        app: flask-app # "los Pods que creo llevan esta etiqueta"
+    spec:
+      containers:
+        - name: flask-container
+          image: agustindev/app-vote:1.0
+          ports:
+            - containerPort: 80
+          env: ##Aca sacamos el valor de el secret que creamos en AWS Secrets Manager y que se mapea en el Secret de K8s
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+          envFrom:
+            - configMapRef: #REDIS HOST y DATABASE_HOST del ConfigMaps
+                name: host-config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

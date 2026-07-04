@@ -10,10 +10,10 @@ services:
       - DATABASE_HOST=database
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
-      - DATABASE_DB=votes
+      - DATABASE_NAME=votes
     depends_on:
       - redis
-      - database
+      - databasehy  ``
 
   result:
     build: ./result
@@ -26,7 +26,7 @@ services:
       - DATABASE_HOST=database
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
-      - DATABASE_DB=votes
+      - DATABASE_NAME=votes
     depends_on:
       - redis
       - database  
@@ -42,7 +42,7 @@ services:
       - DATABASE_HOST=database
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
-      - DATABASE_DB=votes
+      - DATABASE_NAME=votes
     depends_on:
       - redis
       - database
