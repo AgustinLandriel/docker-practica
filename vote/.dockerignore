@@ -1,0 +1,29 @@
+# Control de versiones
+.git
+.gitignore
+.github/
+
+# Entornos virtuales de Python (¡No deben ir al contenedor!)
+venv/
+env/
+.venv/
+
+# Caché y binarios compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de entorno local y secretos (¡Seguridad!)
+.env
+.env.local
+secrets.json
+
+# Herramientas de desarrollo o testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Archivos propios de Docker (opcional, pero buena práctica)
+Dockerfile
+.dockerignore

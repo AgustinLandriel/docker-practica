@@ -1,5 +1,8 @@
 aws-keys.yaml
 README-kubernetes.md
+argo-cd.md
 requirements.txt
 package.json
 .nvmrc
+docker-compose.yml
+k8s/
