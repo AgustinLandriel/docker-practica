@@ -48,7 +48,7 @@ jobs:
           git config user.email "actions@github.com"
           
           # 3. Reemplazar el tag de la imagen en el archivo YAML usando sed
-          sed -i "s|image: ${{ secrets.DOCKERHUB_NAME }}/app-worker:.*|image: ${{ secrets.DOCKERHUB_NAME }}/app-worker:${{ github.sha }}|g" k8s/worker.yaml
+          sed -i "s|image: ${{ secrets.DOCKERHUB_NAME }}/app-worker:.*|image: ${{ secrets.DOCKERHUB_NAME }}/app-worker:${{ github.sha }}|g" k8s/worker/worker.yaml
           
           # 4. Hacer commit y push del cambio
           git add .
