@@ -33,5 +33,5 @@ jobs:
           push: ${{ github.event_name == 'push' }} # solo pushea en push a main, no en PR
           tags: |
             ${{ secrets.DOCKERHUB_NAME }}/app-vote:latest              
-            ${{ secrets.DOCKERHUB_TOKEN }}/app-vote:${{ github.sha }} 
+            ${{ secrets.DOCKERHUB_NAME }}/app-vote:${{ github.sha }} 
         ## Arma la imagen con el tag "latest" y con el tag del commit SHA, y pushea a DockerHub si es un push a main, no en PR
