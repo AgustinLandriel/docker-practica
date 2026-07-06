@@ -145,7 +145,7 @@ def metrics_updater():
                 update_database_metrics()
             time.sleep(10)  # Update every 10 seconds
         except Exception as e:
-            app.logger.error(f'Error in metrics updater: {e}')
+            app.logger.error(f'Error in metrics updaters: {e}')
             time.sleep(10)
 
 # Start background metrics updater

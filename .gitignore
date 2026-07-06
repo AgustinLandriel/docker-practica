@@ -5,4 +5,4 @@ requirements.txt
 package.json
 .nvmrc
 docker-compose.yml
-k8s/
+k8s/*
