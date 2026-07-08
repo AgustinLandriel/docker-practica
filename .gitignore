@@ -6,3 +6,6 @@ package.json
 .nvmrc
 docker-compose.yml
 k8s/*
+ci-result-minikube.yaml
+ci-vote-minikube.yaml
+ci-worker-minikube.yaml
