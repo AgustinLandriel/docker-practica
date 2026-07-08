@@ -1,4 +1,4 @@
-name: Worker - CI Docker build and Push
+name: worker - Build and Push Docker Image
 
 on:
   push:
@@ -16,28 +16,32 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-
-        uses: docker/setup-buildx-action@v2
-      - name: Log in to DockerHub
-
-        uses: docker/login-action@v2
+     
+      - name: Checkout del codigo
+        uses: actions/checkout@v3
+      
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKERHUB_NAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./worker                          # !!!!!!!!!!!!! carpeta con el Dockerfile !!!!!!!!!!!!!!!!!!!
-          push: ${{ github.event_name == 'push' }} # solo pushea en push a main, no en PR
-          tags: |
-            ${{ secrets.DOCKERHUB_NAME }}/app-worker:latest              
-            ${{ secrets.DOCKERHUB_NAME }}/app-worker:${{ github.sha }} 
-        ## Arma la imagen con el tag "latest" y con el tag del commit SHA, y pushea a DockerHub si es un push a main, no en PR
+      - name: Login a Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} ## Esto conecta a  325503636955.dkr.ecr.us-east-2.amazonaws.com/voting-app/worker
+          ECR_REPOSITORY: voting-app/worker
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
       - name: Update GitOps Repository
-        # Solo actualizamos el repo de GitOps si la construcción en DockerHub fue exitosa
+        # Solo actualizamos el repo de GitOps si la construcción en ECR fue exitosa
         run: |
           # 1. Clonar el repositorio de GitOps usando el token personal (PAT)
           git clone https://x-access-token:${{ secrets.GITOPS_PAT }}@github.com/AgustinLandriel/gitops-voting-app.git
@@ -48,9 +52,20 @@ jobs:
           git config user.email "actions@github.com"
           
           # 3. Reemplazar el tag de la imagen en el archivo YAML usando sed
-          sed -i "s|image: ${{ secrets.DOCKERHUB_NAME }}/app-worker:.*|image: ${{ secrets.DOCKERHUB_NAME }}/app-worker:${{ github.sha }}|g" k8s/worker/worker.yaml
+          sed -i "s|image: .*|image: ${{ steps.login-ecr.outputs.registry }}/voting-app/worker:${{ github.sha }}|g" k8s/worker/worker.yaml
           
           # 4. Hacer commit y push del cambio
           git add .
-          git commit -m "Update worker image tag to ${{ github.sha }}"
+          git commit -m "Update worker image tag to ECR tag ${{ github.sha }}"
           git push origin main
+
+
+# 1. El CI buildea la imagen y la pushea a Docker Hub con tag = a1b2c3d (el SHA)
+#       ↓
+# 2. Este comando sed actualiza el YAML: image: .../app-worker:a1b2c3d
+#       ↓
+# 3. El CI pushea ese YAML cambiado al repo de manifiestos
+#       ↓
+# 4. ArgoCD detecta que el YAML cambió (el tag es distinto)
+#       ↓
+# 5. ArgoCD despliega la imagen a1b2c3d → el Pod nuevo corre el código recién buildeado
