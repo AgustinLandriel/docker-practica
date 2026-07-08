@@ -1,4 +1,4 @@
-name: vote - Build and Push Docker Image
+name: vote - Build and Push ECR Image
 
 on:
   push:

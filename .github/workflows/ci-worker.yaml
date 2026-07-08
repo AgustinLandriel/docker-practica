@@ -1,4 +1,4 @@
-name: worker - Build and Push Docker Image
+name: worker - Build and Push ECR Image
 
 on:
   push:

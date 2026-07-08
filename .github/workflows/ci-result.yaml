@@ -1,4 +1,4 @@
-name: Result - Build and Push Docker Image
+name: Result - Build and Push ECR Image
 
 on:
   push:
